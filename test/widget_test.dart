@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:noto_app/app.dart'; // ganti jika nama project berbeda
+import 'package:noto_app/main.dart'; // ganti jika nama project berbeda
 
 void main() {
-  testWidgets('Tampilan awal HomePage menampilkan catatan dan tombol tambah', (WidgetTester tester) async {
+  testWidgets('Tampilan awal HomePage menampilkan catatan dan tombol tambah', (
+    WidgetTester tester,
+  ) async {
     // Jalankan aplikasi
     await tester.pumpWidget(const MyApp());
 

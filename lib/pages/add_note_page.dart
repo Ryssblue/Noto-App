@@ -1,36 +1,36 @@
 import 'package:flutter/material.dart';
 
 class AddNotePage extends StatelessWidget {
-  final TextEditingController controller = TextEditingController();
+  final void Function(String) onSave;
 
-  void _saveNote(BuildContext context) {
-    if (controller.text.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Catatan disimpan!')),
-      );
-      controller.clear();
-    }
-  }
+  const AddNotePage({required this.onSave, super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = TextEditingController();
+
     return Padding(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           TextField(
             controller: controller,
             maxLines: 6,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Tulis catatanmu di sini...',
               border: OutlineInputBorder(),
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: () => _saveNote(context),
-            icon: Icon(Icons.check),
-            label: Text('Simpan'),
+            onPressed: () {
+              if (controller.text.trim().isNotEmpty) {
+                onSave(controller.text.trim());
+                controller.clear();
+              }
+            },
+            icon: const Icon(Icons.check),
+            label: const Text('Simpan'),
           ),
         ],
       ),

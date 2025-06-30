@@ -23,8 +23,16 @@ class NoteCard extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(icon: const Icon(Icons.edit), onPressed: onEdit),
-            IconButton(icon: const Icon(Icons.delete), onPressed: onDelete),
+            IconButton(
+              icon: const Icon(Icons.edit),
+              color: const Color.fromARGB(198, 59, 39, 39),
+              onPressed: onEdit,
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              color: const Color.fromARGB(198, 247, 0, 0),
+              onPressed: onDelete,
+            ),
           ],
         ),
       ),

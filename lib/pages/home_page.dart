@@ -120,7 +120,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Noto - Catatan")),
+      appBar: AppBar(
+        title: const Text("Noto - Catatan"),
+        backgroundColor: const Color.fromARGB(255, 146, 87, 87),
+      ),
       body: _selectedIndex == 0
           ? _buildNoteList()
           : AddNotePage(
@@ -131,12 +134,16 @@ class _HomePageState extends State<HomePage> {
                 });
                 await _saveNotes();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Catatan berhasil ditambahkan!')),
+                  const SnackBar(
+                    content: Text('Catatan berhasil ditambahkan!'),
+                  ),
                 );
               },
             ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
+        selectedItemColor: const Color.fromARGB(199, 107, 48, 48),
+        unselectedItemColor: Colors.grey,
         onTap: (index) {
           setState(() {
             _selectedIndex = index;

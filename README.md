@@ -6,5 +6,5 @@
  tugas: Feature Developer- Fitur tambah/edit/hapus catatan<br>- `NoteModel`<br>- Simpan lokal        
  3.  member 2    
  tugas: Firebase & Auth Integration-   Firebase setup<br>- Login/register<br>- Simpan ke Firestore               
- 4.  member 3     
+ 4.  Rahmawati   
  tugas: Testing, Dokumentasi, Git Manager-  `flutter test`<br>- `README.md` & laporan<br>- Git & video demo    

@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/note_model.dart';
 import '../widgets/note_card.dart';
 import 'add_note_page.dart';
 
@@ -11,8 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-  List<String> notes = [];
+  List<NoteModel> notes = [];
 
   @override
   void initState() {
@@ -22,71 +23,82 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadNotes() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedNotes = prefs.getStringList('notes') ?? [];
+    final jsonList = prefs.getStringList('notes') ?? [];
+
     setState(() {
-      notes = savedNotes;
+      notes = jsonList
+          .map((item) => NoteModel.fromMap(json.decode(item)))
+          .toList();
     });
   }
 
   Future<void> _saveNotes() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('notes', notes);
+    final jsonList =
+        notes.map((note) => json.encode(note.toMap())).toList();
+    await prefs.setStringList('notes', jsonList);
   }
 
   void _editNote(int index) async {
-    final editedText = await showDialog<String>(
+    final edited = await showDialog<NoteModel>(
       context: context,
       builder: (context) {
-        final controller = TextEditingController(text: notes[index]);
+        final titleController = TextEditingController(text: notes[index].title);
+        final contentController = TextEditingController(text: notes[index].content);
         return AlertDialog(
           title: const Text('Edit Catatan'),
-          content: TextField(controller: controller),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: titleController, decoration: const InputDecoration(hintText: 'Judul')),
+              const SizedBox(height: 12),
+              TextField(controller: contentController, decoration: const InputDecoration(hintText: 'Isi')),
+            ],
+          ),
           actions: [
-            TextButton(
-              child: const Text('Batal'),
-              onPressed: () => Navigator.pop(context),
-            ),
+            TextButton(child: const Text('Batal'), onPressed: () => Navigator.pop(context)),
             ElevatedButton(
               child: const Text('Simpan'),
-              onPressed: () => Navigator.pop(context, controller.text),
+              onPressed: () {
+                if (titleController.text.trim().isNotEmpty &&
+                    contentController.text.trim().isNotEmpty) {
+                  Navigator.pop(context, NoteModel(
+                    title: titleController.text.trim(),
+                    content: contentController.text.trim(),
+                  ));
+                }
+              },
             ),
           ],
         );
       },
     );
 
-    if (editedText != null && editedText.trim().isNotEmpty) {
+    if (edited != null) {
       setState(() {
-        notes[index] = editedText.trim();
+        notes[index] = edited;
       });
       await _saveNotes();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Catatan berhasil diperbarui!')),
+        const SnackBar(content: Text('Catatan diperbarui!')),
       );
     }
   }
 
   void _deleteNote(int index) async {
-    final confirmed = await showDialog<bool>(
+    final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi'),
+      builder: (_) => AlertDialog(
+        title: const Text('Hapus Catatan'),
         content: const Text('Yakin ingin menghapus catatan ini?'),
         actions: [
-          TextButton(
-            child: const Text('Batal'),
-            onPressed: () => Navigator.pop(context, false),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Hapus'),
-            onPressed: () => Navigator.pop(context, true),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Hapus')),
         ],
       ),
     );
 
-    if (confirmed == true) {
+    if (confirm == true) {
       setState(() {
         notes.removeAt(index);
       });
@@ -97,62 +109,67 @@ class _HomePageState extends State<HomePage> {
   Widget _buildNoteList() {
     if (notes.isEmpty) {
       return const Center(
-        child: Text(
-          'Belum ada catatan',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
-        ),
+        child: Text('Belum ada catatan.', style: TextStyle(color: Colors.grey)),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(top: 16),
       itemCount: notes.length,
-      itemBuilder: (context, index) {
-        return NoteCard(
-          content: notes[index],
-          onEdit: () => _editNote(index),
-          onDelete: () => _deleteNote(index),
-        );
-      },
+      itemBuilder: (context, index) => NoteCard(
+        note: notes[index],
+        onEdit: () => _editNote(index),
+        onDelete: () => _deleteNote(index),
+      ),
+    );
+  }
+
+  void _navigateToAddNote() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddNotePage(
+          onSave: (NoteModel note) async {
+            setState(() {
+              notes.add(note);
+            });
+            await _saveNotes();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Catatan ditambahkan!')),
+            );
+          },
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F7FB),
       appBar: AppBar(
-        title: const Text("Noto - Catatan"),
-        backgroundColor: const Color.fromARGB(255, 146, 87, 87),
-      ),
-      body: _selectedIndex == 0
-          ? _buildNoteList()
-          : AddNotePage(
-              onSave: (String newNote) async {
-                setState(() {
-                  notes.add(newNote);
-                  _selectedIndex = 0;
-                });
-                await _saveNotes();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Catatan berhasil ditambahkan!'),
-                  ),
-                );
-              },
-            ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        selectedItemColor: const Color.fromARGB(199, 107, 48, 48),
-        unselectedItemColor: Colors.grey,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Tambah'),
+        title: const Text("Note App"),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _navigateToAddNote,
+          )
         ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Welcome, User 👋",
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            Expanded(child: _buildNoteList()),
+          ],
+        ),
       ),
     );
   }

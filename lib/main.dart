@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode, // Aman untuk web & native
+      builder: (context) => const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

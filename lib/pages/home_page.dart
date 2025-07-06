@@ -34,8 +34,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _saveNotes() async {
     final prefs = await SharedPreferences.getInstance();
-    final jsonList =
-        notes.map((note) => json.encode(note.toMap())).toList();
+    final jsonList = notes.map((note) => json.encode(note.toMap())).toList();
     await prefs.setStringList('notes', jsonList);
   }
 
@@ -44,28 +43,42 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (context) {
         final titleController = TextEditingController(text: notes[index].title);
-        final contentController = TextEditingController(text: notes[index].content);
+        final contentController = TextEditingController(
+          text: notes[index].content,
+        );
         return AlertDialog(
           title: const Text('Edit Catatan'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: titleController, decoration: const InputDecoration(hintText: 'Judul')),
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(hintText: 'Judul'),
+              ),
               const SizedBox(height: 12),
-              TextField(controller: contentController, decoration: const InputDecoration(hintText: 'Isi')),
+              TextField(
+                controller: contentController,
+                decoration: const InputDecoration(hintText: 'Isi'),
+              ),
             ],
           ),
           actions: [
-            TextButton(child: const Text('Batal'), onPressed: () => Navigator.pop(context)),
+            TextButton(
+              child: const Text('Batal'),
+              onPressed: () => Navigator.pop(context),
+            ),
             ElevatedButton(
               child: const Text('Simpan'),
               onPressed: () {
                 if (titleController.text.trim().isNotEmpty &&
                     contentController.text.trim().isNotEmpty) {
-                  Navigator.pop(context, NoteModel(
-                    title: titleController.text.trim(),
-                    content: contentController.text.trim(),
-                  ));
+                  Navigator.pop(
+                    context,
+                    NoteModel(
+                      title: titleController.text.trim(),
+                      content: contentController.text.trim(),
+                    ),
+                  );
                 }
               },
             ),
@@ -79,9 +92,9 @@ class _HomePageState extends State<HomePage> {
         notes[index] = edited;
       });
       await _saveNotes();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Catatan diperbarui!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Catatan diperbarui!')));
     }
   }
 
@@ -92,8 +105,14 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Hapus Catatan'),
         content: const Text('Yakin ingin menghapus catatan ini?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Hapus')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Hapus'),
+          ),
         ],
       ),
     );
@@ -156,7 +175,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _navigateToAddNote,
-          )
+          ),
         ],
       ),
       body: Padding(
@@ -164,8 +183,10 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Welcome, User 👋",
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              "Welcome, User 👋",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 12),
             Expanded(child: _buildNoteList()),
           ],

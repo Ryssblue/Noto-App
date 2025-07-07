@@ -15,11 +15,12 @@ class NoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
+      color: theme.cardColor,
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -39,8 +40,7 @@ class NoteCard extends StatelessWidget {
                   children: [
                     Text(
                       note.title,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -49,9 +49,9 @@ class NoteCard extends StatelessWidget {
                       note.content.length > 100
                           ? '${note.content.substring(0, 100)}...'
                           : note.content,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black54,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme
+                            .hintColor, // Ini akan otomatis menyesuaikan dark/light
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -68,16 +68,10 @@ class NoteCard extends StatelessWidget {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'edit',
-                    child: Text('Edit'),
-                  ),
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Text('Hapus'),
-                  ),
+                  const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                  const PopupMenuItem(value: 'delete', child: Text('Hapus')),
                 ],
-                icon: const Icon(Icons.more_vert),
+                icon: Icon(Icons.more_vert, color: theme.iconTheme.color),
               ),
             ],
           ),

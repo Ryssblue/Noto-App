@@ -15,11 +15,12 @@ class NoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(
@@ -50,10 +51,7 @@ class NoteCard extends StatelessWidget {
                   note.content.length > 100
                       ? '${note.content.substring(0, 100)}...'
                       : note.content,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
                 ),

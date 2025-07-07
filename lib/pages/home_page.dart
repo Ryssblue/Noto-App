@@ -122,12 +122,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text("Note App"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
         elevation: 0,
         actions: [
           IconButton(
@@ -141,10 +140,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Welcome, User 👋",
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text("Welcome, User 👋", style: theme.textTheme.titleMedium),
             const SizedBox(height: 12),
             Expanded(child: _buildNoteList()),
           ],

@@ -47,13 +47,10 @@ class _EditNotePageState extends State<EditNotePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // ambil theme sekarang
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Edit Catatan"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text("Edit Catatan"), elevation: 0),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Column(
@@ -63,11 +60,13 @@ class _EditNotePageState extends State<EditNotePage> {
               decoration: InputDecoration(
                 labelText: 'Judul',
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: theme.inputDecorationTheme.fillColor,
+                labelStyle: theme.textTheme.bodyMedium,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
             TextField(
@@ -76,11 +75,13 @@ class _EditNotePageState extends State<EditNotePage> {
               decoration: InputDecoration(
                 labelText: 'Isi',
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: theme.inputDecorationTheme.fillColor,
+                labelStyle: theme.textTheme.bodyMedium,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),
             SizedBox(

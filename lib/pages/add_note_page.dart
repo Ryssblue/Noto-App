@@ -10,15 +10,11 @@ class AddNotePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final titleController = TextEditingController();
     final contentController = TextEditingController();
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
-      appBar: AppBar(
-        title: const Text("Tambah Catatan"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0,
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(title: const Text("Tambah Catatan"), elevation: 0),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Column(
@@ -28,11 +24,15 @@ class AddNotePage extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Judul catatan...',
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: theme.inputDecorationTheme.fillColor,
+                hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.hintColor,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
             TextField(
@@ -41,11 +41,15 @@ class AddNotePage extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Tulis isi catatan...',
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: theme.inputDecorationTheme.fillColor,
+                hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.hintColor,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),
             SizedBox(

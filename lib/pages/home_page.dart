@@ -5,21 +5,31 @@ import '../models/note_model.dart';
 import '../widgets/note_card.dart';
 import 'add_note_page.dart';
 import 'edit_note_page.dart';
+import 'auth_page.dart'; // untuk logout kembali ke login
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   List<NoteModel> notes = [];
+  String userName = '';
 
   @override
   void initState() {
     super.initState();
+    _loadUserName();
     _loadNotes();
+  }
+
+  Future<void> _loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('user_name') ?? '';
+    });
   }
 
   Future<void> _loadNotes() async {
@@ -50,9 +60,9 @@ class _HomePageState extends State<HomePage> {
         notes[index] = updatedNote;
       });
       await _saveNotes();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Catatan diperbarui!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Catatan diperbarui!')),
+      );
     }
   }
 
@@ -86,7 +96,10 @@ class _HomePageState extends State<HomePage> {
   Widget _buildNoteList() {
     if (notes.isEmpty) {
       return const Center(
-        child: Text('Belum ada catatan.', style: TextStyle(color: Colors.grey)),
+        child: Text(
+          'Belum ada catatan.',
+          style: TextStyle(color: Colors.grey),
+        ),
       );
     }
 
@@ -120,13 +133,21 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _logout() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const AuthPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Note App"),
+        title: const Text("Noto"),
         elevation: 0,
         actions: [
           IconButton(
@@ -135,12 +156,50 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+
+      // ✅ SIDEBAR
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.indigo),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.person, size: 48, color: Colors.white),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Halo, $userName',
+                    style: const TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Beranda'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: _logout,
+            ),
+          ],
+        ),
+      ),
+
+      // ✅ BODY
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Welcome, User 👋", style: theme.textTheme.titleMedium),
+            Text(
+              'Selamat datang, $userName 👋',
+              style: theme.textTheme.titleMedium,
+            ),
             const SizedBox(height: 12),
             Expanded(child: _buildNoteList()),
           ],

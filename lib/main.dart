@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/home_page.dart';
+import 'pages/auth_page.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 
@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
       ),
 
       themeMode: ThemeMode.system, // Mengikuti sistem (otomatis dark/light)
-      home: const HomePage(),
+      home: const AuthPage(),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/note_model.dart';
 import '../widgets/note_card.dart';
 import 'add_note_page.dart';
+import 'edit_note_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -39,57 +40,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _editNote(int index) async {
-    final edited = await showDialog<NoteModel>(
-      context: context,
-      builder: (context) {
-        final titleController = TextEditingController(text: notes[index].title);
-        final contentController = TextEditingController(
-          text: notes[index].content,
-        );
-        return AlertDialog(
-          title: const Text('Edit Catatan'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(hintText: 'Judul'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: contentController,
-                decoration: const InputDecoration(hintText: 'Isi'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Batal'),
-              onPressed: () => Navigator.pop(context),
-            ),
-            ElevatedButton(
-              child: const Text('Simpan'),
-              onPressed: () {
-                if (titleController.text.trim().isNotEmpty &&
-                    contentController.text.trim().isNotEmpty) {
-                  Navigator.pop(
-                    context,
-                    NoteModel(
-                      title: titleController.text.trim(),
-                      content: contentController.text.trim(),
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
-        );
-      },
+    final updatedNote = await Navigator.push<NoteModel>(
+      context,
+      MaterialPageRoute(builder: (_) => EditNotePage(note: notes[index])),
     );
 
-    if (edited != null) {
+    if (updatedNote != null) {
       setState(() {
-        notes[index] = edited;
+        notes[index] = updatedNote;
       });
       await _saveNotes();
       ScaffoldMessenger.of(

@@ -50,9 +50,9 @@ class _AuthPageState extends State<AuthPage> {
           MaterialPageRoute(builder: (_) => const HomePage()),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login gagal!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Login gagal!')));
       }
     } else {
       if (name.isEmpty) {
@@ -62,9 +62,9 @@ class _AuthPageState extends State<AuthPage> {
         return;
       }
       if (password != confirmPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password tidak cocok')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Password tidak cocok')));
         return;
       }
 
@@ -88,45 +88,56 @@ class _AuthPageState extends State<AuthPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 48),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.indigo[100],
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.indigo[100],
+                        ),
+                        child: const Icon(
+                          Icons.menu_book,
+                          color: Colors.indigo,
+                          size: 28,
+                        ),
                       ),
-                      child: const Icon(Icons.menu_book, color: Colors.indigo, size: 28),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Noto',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.indigo[700],
-                        letterSpacing: 1.2,
+                      const SizedBox(width: 10),
+                      Text(
+                        'Noto',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.indigo[700],
+                          letterSpacing: 1.2,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 32),
 
               Text(
                 isLogin ? 'Selamat Datang 👋' : 'Buat Akun Baru 📝',
-                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
-                isLogin ? 'Silakan login untuk melanjutkan' : 'Isi data untuk daftar akun',
+                isLogin
+                    ? 'Silakan login untuk melanjutkan'
+                    : 'Isi data untuk daftar akun',
                 style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 32),
@@ -151,7 +162,9 @@ class _AuthPageState extends State<AuthPage> {
                 decoration: InputDecoration(
                   hintText: 'Password',
                   suffixIcon: IconButton(
-                    icon: Icon(obscurePassword ? Icons.visibility_off : Icons.visibility),
+                    icon: Icon(
+                      obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    ),
                     onPressed: () {
                       setState(() {
                         obscurePassword = !obscurePassword;
@@ -169,9 +182,11 @@ class _AuthPageState extends State<AuthPage> {
                   decoration: InputDecoration(
                     hintText: 'Konfirmasi password',
                     suffixIcon: IconButton(
-                      icon: Icon(obscureConfirmPassword
-                          ? Icons.visibility_off
-                          : Icons.visibility),
+                      icon: Icon(
+                        obscureConfirmPassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
                       onPressed: () {
                         setState(() {
                           obscureConfirmPassword = !obscureConfirmPassword;
@@ -190,7 +205,9 @@ class _AuthPageState extends State<AuthPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.indigo,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: Text(
                     isLogin ? 'Login' : 'Daftar',

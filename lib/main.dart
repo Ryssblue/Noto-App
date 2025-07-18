@@ -12,7 +12,7 @@ void main() {
     ),
   );
 }
-
+ 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Note App',
       debugShowCheckedModeBanner: false,
-      useInheritedMediaQuery: true, // penting untuk DevicePreview
+      // penting untuk DevicePreview
       // Light Mode
       theme: ThemeData(
         brightness: Brightness.light,

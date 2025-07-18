@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
 import '../models/note_model.dart';
 
-class AddNotePage extends StatelessWidget {
+class AddNotePage extends StatefulWidget {
   final void Function(NoteModel) onSave;
 
   const AddNotePage({required this.onSave, super.key});
 
   @override
+  State<AddNotePage> createState() => _AddNotePageState();
+}
+
+class _AddNotePageState extends State<AddNotePage> {
+  final titleController = TextEditingController();
+  final contentController = TextEditingController();
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    contentController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final titleController = TextEditingController();
-    final contentController = TextEditingController();
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -58,7 +71,7 @@ class AddNotePage extends StatelessWidget {
                 onPressed: () {
                   if (titleController.text.trim().isNotEmpty &&
                       contentController.text.trim().isNotEmpty) {
-                    onSave(
+                    widget.onSave(
                       NoteModel(
                         title: titleController.text.trim(),
                         content: contentController.text.trim(),

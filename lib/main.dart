@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
       // penting untuk DevicePreview
       // Light Mode
       theme: ThemeData(
+        fontFamily: 'Roboto',
         brightness: Brightness.light,
         scaffoldBackgroundColor: const Color(0xFFF6F7FB),
         appBarTheme: const AppBarTheme(
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
 
       // Dark Mode
       darkTheme: ThemeData(
+        fontFamily: 'Roboto',
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color.fromARGB(255, 44, 44, 44),
         appBarTheme: const AppBarTheme(

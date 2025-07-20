@@ -10,6 +10,7 @@ import 'auth_page.dart';
 import 'note_detail_page.dart';
 import '../menu/favorites_page.dart';
 import '../menu/settings_page.dart';
+import '../menu/archived_notes_page.dart'; // Import halaman arsip
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -49,8 +50,11 @@ class _HomePageState extends State<HomePage> {
     final prefs = await SharedPreferences.getInstance();
     final jsonList = prefs.getStringList('notes') ?? [];
     setState(() {
-      notes = jsonList.map((item) => NoteModel.fromMap(json.decode(item))).toList();
-      filteredNotes = notes;
+      notes = jsonList
+          .map((item) => NoteModel.fromMap(json.decode(item)))
+          .toList();
+      // Pastikan catatan yang diarsipkan tidak muncul di halaman utama secara default
+      filteredNotes = notes.where((note) => !note.isArchived).toList();
     });
   }
 
@@ -63,10 +67,11 @@ class _HomePageState extends State<HomePage> {
   void _filterNotes() {
     final query = _searchController.text.toLowerCase();
     setState(() {
+      // Filter catatan yang tidak diarsipkan dan cocok dengan kueri pencarian
       filteredNotes = notes.where((note) {
         final titleMatch = note.title.toLowerCase().contains(query);
         final contentMatch = note.content.toLowerCase().contains(query);
-        return titleMatch || contentMatch;
+        return (titleMatch || contentMatch) && !note.isArchived;
       }).toList();
     });
   }
@@ -81,11 +86,10 @@ class _HomePageState extends State<HomePage> {
       notes[originalIndex].toggleFavorite();
     });
     _saveNotes();
-    _filterNotes();
+    _filterNotes(); // Re-filter untuk memperbarui tampilan jika perlu
   }
-  
+
   void _viewNote(int originalIndex) {
-    // Navigasi ke halaman detail dengan membawa data catatan
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -93,12 +97,27 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
   void _editNote(int originalIndex) async {
+    // Menunggu hasil dari EditNotePage (catatan yang sudah diedit)
+    // Karena NoteModel diteruskan sebagai referensi, perubahan di EditNotePage
+    // langsung memengaruhi objek di `notes[originalIndex]`.
+    // Kita hanya perlu await untuk memastikan EditNotePage selesai,
+    // lalu panggil _saveNotes() untuk menyimpan perubahan tersebut.
     await Navigator.push<NoteModel>(
       context,
-      MaterialPageRoute(builder: (_) => EditNotePage(note: notes[originalIndex])),
+      MaterialPageRoute(
+        builder: (_) => EditNotePage(note: notes[originalIndex]),
+      ),
     );
-    await _refreshNotes();
+    // ✅ PERBAIKAN PENTING: Panggil _saveNotes() setelah EditNotePage selesai
+    await _saveNotes();
+    await _refreshNotes(); // Muat ulang dan filter catatan untuk memperbarui UI
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Catatan berhasil diubah!')));
+    }
   }
 
   void _deleteNote(int originalIndex) async {
@@ -108,19 +127,37 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Hapus Catatan'),
         content: const Text('Yakin ingin menghapus catatan ini?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Hapus')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Hapus'),
+          ),
         ],
       ),
     );
-    
+
     if (confirm == true) {
       setState(() {
         notes.removeAt(originalIndex);
       });
       await _saveNotes();
-      _filterNotes();
+      _filterNotes(); // Re-filter untuk memperbarui tampilan
     }
+  }
+
+  // Fungsi untuk mengarsipkan catatan
+  void _archiveNote(int originalIndex) {
+    setState(() {
+      notes[originalIndex].toggleArchive(); // Mengubah status isArchived
+    });
+    _saveNotes();
+    _filterNotes(); // Perbarui daftar catatan yang ditampilkan (sembunyikan yang diarsipkan)
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Catatan diarsipkan!')));
   }
 
   Widget _buildNoteList() {
@@ -140,14 +177,17 @@ class _HomePageState extends State<HomePage> {
       itemCount: filteredNotes.length,
       itemBuilder: (context, index) {
         final note = filteredNotes[index];
-        final originalIndex = notes.indexOf(note);
+        final originalIndex = notes.indexOf(
+          note,
+        ); // Dapatkan indeks di daftar `notes` asli
 
         return NoteCard(
           note: note,
-          onTap: () => _viewNote(originalIndex), 
+          onTap: () => _viewNote(originalIndex),
           onEdit: () => _editNote(originalIndex),
           onDelete: () => _deleteNote(originalIndex),
           onToggleFavorite: () => _toggleFavorite(originalIndex),
+          onArchive: () => _archiveNote(originalIndex), // Panggil fungsi arsip
         );
       },
     );
@@ -163,7 +203,7 @@ class _HomePageState extends State<HomePage> {
               notes.add(newNote);
             });
             await _saveNotes();
-            _filterNotes();
+            _filterNotes(); // Re-filter untuk menyertakan catatan baru dalam daftar yang ditampilkan
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Catatan ditambahkan!')),
@@ -220,12 +260,16 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               leading: const Icon(Icons.star_border),
               title: const Text('Favorit'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
+              onTap: () async {
+                Navigator.pop(context); // Tutup drawer
+                await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const FavoritesPage()),
+                  // Kirim semua catatan ke FavoritesPage agar bisa difilter
+                  MaterialPageRoute(
+                    builder: (_) => FavoritesPage(allNotes: notes),
+                  ),
                 );
+                _refreshNotes(); // Muat ulang catatan setelah kembali
               },
             ),
             ListTile(
@@ -246,8 +290,16 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               leading: const Icon(Icons.archive_outlined),
               title: const Text('Arsip'),
-              onTap: () {
-                // TODO: Navigasi ke Halaman Arsip
+              onTap: () async {
+                Navigator.pop(context); // Tutup drawer
+                await Navigator.push(
+                  context,
+                  // Kirim semua catatan ke ArchivedNotesPage
+                  MaterialPageRoute(
+                    builder: (_) => ArchivedNotesPage(allNotes: notes),
+                  ),
+                );
+                _refreshNotes(); // Muat ulang catatan setelah kembali
               },
             ),
             ListTile(
@@ -284,7 +336,9 @@ class _HomePageState extends State<HomePage> {
           children: [
             Text(
               'Selamat datang, $userName 👋',
-              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -301,7 +355,13 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 16),
-            Expanded(child: _buildNoteList()),
+            Expanded(
+              child: RefreshIndicator(
+                // Tambahkan RefreshIndicator untuk pull-to-refresh
+                onRefresh: _refreshNotes,
+                child: _buildNoteList(),
+              ),
+            ),
           ],
         ),
       ),

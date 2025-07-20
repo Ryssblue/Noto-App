@@ -1,120 +1,162 @@
+// widgets/note_card.dart
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Untuk format tanggal
 import '../models/note_model.dart';
 
 class NoteCard extends StatelessWidget {
   final NoteModel note;
+  final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-  final VoidCallback onToggleFavorite; // ✅ TAMBAHKAN INI
-  final VoidCallback onTap;
+  final VoidCallback onToggleFavorite;
+  final VoidCallback? onArchive; // Callback untuk aksi Arsipkan
+  final IconData? editIcon; // Ikon kustom untuk aksi "Edit" (misal: unarchive)
+  final IconData?
+  deleteIcon; // Ikon kustom untuk aksi "Delete" (misal: delete_forever)
 
   const NoteCard({
-    super.key,
+    Key? key,
     required this.note,
+    required this.onTap,
     required this.onEdit,
     required this.onDelete,
-    required this.onToggleFavorite, // ✅ TAMBAHKAN INI
-    required this.onTap,
-  });
+    required this.onToggleFavorite,
+    this.onArchive,
+    this.editIcon,
+    this.deleteIcon,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final favorite = note.isFavorite; // ✅ GUNAKAN PROPERTI FAVORIT DARI MODEL
-  
     return Card(
-      color: theme.cardColor,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Semantics(
-        label: 'Catatan: ${note.title}. Ketuk untuk melihat detail.',
-        button: true,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            // TODO: Buka detail catatan jika dibutuhkan
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.notes, color: Colors.indigo),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                          Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                note.title,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            // Tombol untuk mengubah status favorit
-                            IconButton(
-                              icon: Icon(
-                                favorite ? Icons.star : Icons.star_border,
-                                color: favorite ? Colors.amber : Colors.grey,
-                                size: 22,
-                              ),
-                              onPressed: onToggleFavorite,
-                            ),
-                          ],
-                        ),
-                      const SizedBox(height: 4),
-                      Text(
-                        note.content,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.hintColor,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+      margin: const EdgeInsets.only(bottom: 10),
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            16,
+            12,
+            16,
+            12,
+          ), // Padding utama kartu
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Bagian Judul, Tombol Favorit, dan Menu Titik Tiga (semua dalam satu baris)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment:
+                    CrossAxisAlignment.center, // Pusatkan secara vertikal
+                children: [
+                  Expanded(
+                    // Judul mengambil ruang yang tersedia
+                    child: Text(
+                      note.title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      onEdit();
-                    } else if (value == 'delete') {
-                      onDelete();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit, size: 20),
-                          SizedBox(width: 8),
-                          Text('Ubah'),
-                        ],
-                      ),
+                  // Tombol Favorit
+                  IconButton(
+                    icon: Icon(
+                      note.isFavorite ? Icons.star : Icons.star_border,
+                      color: note.isFavorite ? Colors.amber : Colors.grey,
                     ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, size: 20, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Hapus'),
-                        ],
-                      ),
-                    ),
-                  ],
-                  icon: Icon(Icons.more_vert, color: theme.iconTheme.color),
+                    onPressed: onToggleFavorite,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 24,
+                      minHeight: 24,
+                    ), // Ukuran ikon lebih ringkas
+                  ),
+                  // Menu Titik Tiga
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        onEdit();
+                      } else if (value == 'delete') {
+                        onDelete();
+                      } else if (value == 'archive') {
+                        onArchive?.call();
+                      }
+                    },
+                    itemBuilder: (BuildContext context) {
+                      final String editText = editIcon == Icons.unarchive
+                          ? 'Keluarkan dari Arsip'
+                          : 'Edit';
+                      final IconData currentEditIcon = editIcon ?? Icons.edit;
+
+                      final String deleteText =
+                          deleteIcon == Icons.delete_forever
+                          ? 'Hapus Permanen'
+                          : 'Hapus';
+                      final IconData currentDeleteIcon =
+                          deleteIcon ?? Icons.delete;
+
+                      return <PopupMenuEntry<String>>[
+                        PopupMenuItem<String>(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(currentEditIcon),
+                              const SizedBox(width: 8),
+                              Text(editText),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(currentDeleteIcon),
+                              const SizedBox(width: 8),
+                              Text(deleteText),
+                            ],
+                          ),
+                        ),
+                        if (onArchive != null && !note.isArchived)
+                          const PopupMenuItem<String>(
+                            value: 'archive',
+                            child: Row(
+                              children: [
+                                Icon(Icons.archive_outlined),
+                                SizedBox(width: 8),
+                                Text('Arsipkan'),
+                              ],
+                            ),
+                          ),
+                      ];
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 4,
+              ), // Spasi antara baris judul/ikon dan konten
+              // 2. Konten (tepat di bawah judul)
+              Text(
+                note.content,
+                style: const TextStyle(fontSize: 14),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4), // Spasi antara konten dan tanggal
+              // 3. Tanggal (tetap di kanan bawah)
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  DateFormat('dd MMM yyyy').format(note.createdAt),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

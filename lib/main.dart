@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'pages/splash_screen.dart';
-import 'package:device_preview/device_preview.dart';
+//import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    DevicePreview(
-      enabled: !kReleaseMode, // Aktifkan hanya saat debug
-      builder: (context) => const MyApp(),
-    ),
+    //DevicePreview(
+    //  enabled: !kReleaseMode, // Aktifkan hanya saat debug
+    //  builder: (context) => const MyApp(),
+    //),
+    const MyApp(),
   );
 }
- 
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

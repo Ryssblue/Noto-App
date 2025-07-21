@@ -6,7 +6,6 @@ class NoteModel {
   bool isFavorite;
   bool isArchived;
   String? category;
-  List<String>? tags;
 
   NoteModel({
     required this.id,
@@ -16,7 +15,6 @@ class NoteModel {
     this.isFavorite = false,
     this.isArchived = false,
     this.category,
-    this.tags,
   });
 
   // Method untuk mengubah status favorit
@@ -39,8 +37,6 @@ class NoteModel {
       'isFavorite': isFavorite,
       'isArchived': isArchived,
       'category': category,
-      // Pastikan untuk menangani list kosong dengan benar
-      'tags': tags,
     };
   }
 
@@ -53,9 +49,6 @@ class NoteModel {
       createdAt: DateTime.parse(map['createdAt'] as String),
       isFavorite: map['isFavorite'] ?? false,
       isArchived: map['isArchived'] ?? false,
-      category: map['category'],
-      // Penanganan yang aman untuk konversi list dari JSON
-      tags: map['tags'] != null ? List<String>.from(map['tags']) : null,
     );
   }
 }

@@ -1,4 +1,3 @@
-// menu/favorites_page.dart
 import 'package:flutter/material.dart';
 import '../models/note_model.dart';
 import '../widgets/note_card.dart';

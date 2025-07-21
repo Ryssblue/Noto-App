@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:noto_app/menu/theme_settings_page.dart';
+import 'package:noto_app/menu/sync_backup_page.dart'; // Import halaman sinkronisasi
+import 'package:noto_app/menu/trash_settings_page.dart'; // Import halaman pengaturan sampah
+import 'package:noto_app/menu/export_data_page.dart'; // Import halaman ekspor data
+import 'package:noto_app/menu/import_data_page.dart'; // Import halaman impor data
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -6,45 +11,117 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pengaturan')),
+      appBar: AppBar(
+        title: const Text('Pengaturan'),
+      ),
       body: ListView(
+        padding: const EdgeInsets.all(16.0),
         children: [
           ListTile(
-            leading: const Icon(Icons.palette_outlined),
+            leading: const Icon(Icons.palette),
             title: const Text('Tampilan & Tema'),
-            onTap: () { /* TODO: Buka halaman pengaturan tema */ },
+            subtitle: const Text('Ubah mode terang/gelap dan warna aksen'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ThemeSettingsPage(),
+                ),
+              );
+            },
           ),
+          const Divider(),
           ListTile(
-            leading: const Icon(Icons.cloud_outlined),
-            title: const Text('Sinkronisasi & Backup'),
-            subtitle: const Text('Terakhir sinkronisasi: 5 menit lalu'),
-            onTap: () { /* TODO: Buka halaman status sinkronisasi */ },
+            leading: const Icon(Icons.sync),
+            title: const Text('Sinkronisasi & Cadangan'),
+            subtitle: const Text('Kelola sinkronisasi data dan cadangan cloud'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SyncBackupPage(),
+                ),
+              );
+            },
           ),
+          const Divider(),
           ListTile(
-            leading: const Icon(Icons.delete_sweep_outlined),
+            leading: const Icon(Icons.delete_sweep),
             title: const Text('Pengaturan Sampah'),
-            subtitle: Text('Hapus otomatis setelah 30 hari'),
-            onTap: () { /* TODO: Buka dialog untuk ubah retensi */ },
+            subtitle: const Text('Konfigurasi retensi catatan yang dihapus'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TrashSettingsPage(),
+                ),
+              );
+            },
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.upload_file_outlined),
+            leading: const Icon(Icons.file_upload),
             title: const Text('Ekspor Data'),
-            onTap: () { /* TODO: Implementasi logika ekspor */ },
-          ),
-          ListTile(
-            leading: const Icon(Icons.download_outlined),
-            title: const Text('Impor Data'),
-            onTap: () { /* TODO: Implementasi logika impor */ },
+            subtitle: const Text('Ekspor catatan Anda ke berkas'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ExportDataPage(),
+                ),
+              );
+            },
           ),
           const Divider(),
-           ListTile(
+          ListTile(
+            leading: const Icon(Icons.file_download),
+            title: const Text('Impor Data'),
+            subtitle: const Text('Impor catatan dari berkas'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ImportDataPage(),
+                ),
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text('Tentang Aplikasi'),
-            onTap: () { /* TODO: Buka halaman 'Tentang' */ },
+            subtitle: const Text('Informasi versi dan pengembang'),
+            onTap: () {
+              _showAboutAppDialog(context);
+            },
           ),
         ],
       ),
+    );
+  }
+
+  // Fungsi pembantu untuk menampilkan dialog Tentang Aplikasi
+  void _showAboutAppDialog(BuildContext context) {
+    showAboutDialog(
+      context: context,
+      applicationName: 'Noto App',
+      applicationVersion: '1.0.0', // Ganti dengan versi aplikasi Anda
+      applicationLegalese: '© 2024 Noto App. All rights reserved.',
+      children: <Widget>[
+        const Padding(
+          padding: EdgeInsets.only(top: 16.0),
+          child: Text(
+            'Aplikasi catatan sederhana untuk membantu Anda mengatur pikiran.',
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.only(top: 8.0),
+          child: Text(
+            'Dikembangkan oleh: Your Name/Team Name', // Ganti dengan nama Anda/tim Anda
+            style: TextStyle(fontSize: 12.0),
+          ),
+        ),
+      ],
     );
   }
 }

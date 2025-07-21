@@ -120,23 +120,54 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Existing _deleteNote function
   void _deleteNote(int originalIndex) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Hapus Catatan'),
-        content: const Text('Yakin ingin menghapus catatan ini?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
+      builder: (BuildContext context) {
+        // Add BuildContext type hint
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ), // Softer corners
+          title: Row(
+            // Add an icon to the title
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+              SizedBox(width: 10),
+              Text(
+                'Hapus Catatan',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Hapus'),
+          content: Text(
+            'Apakah Anda yakin ingin menghapus catatan ini? Tindakan ini tidak dapat dibatalkan.', // More descriptive text
+            style: TextStyle(fontSize: 16),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text(
+                'Batal',
+                style: TextStyle(color: Colors.grey), // Muted color for cancel
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Prominent red for delete
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: const Text('Hapus'),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirm == true) {
@@ -144,7 +175,15 @@ class _HomePageState extends State<HomePage> {
         notes.removeAt(originalIndex);
       });
       await _saveNotes();
-      _filterNotes(); // Re-filter untuk memperbarui tampilan
+      _filterNotes();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Catatan berhasil dihapus!'),
+            backgroundColor: Colors.red, // Green feedback for success
+          ),
+        );
+      }
     }
   }
 
@@ -270,20 +309,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 );
                 _refreshNotes(); // Muat ulang catatan setelah kembali
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.folder_open),
-              title: const Text('Folder'),
-              onTap: () {
-                // TODO: Navigasi ke Halaman Folder
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.label_outline),
-              title: const Text('Tags'),
-              onTap: () {
-                // TODO: Navigasi ke Halaman Tags
               },
             ),
             const Divider(),

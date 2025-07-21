@@ -25,21 +25,24 @@ class _AddNotePageState extends State<AddNotePage> {
   }
 
   void _saveNote() {
-    if (_formKey.currentState!.validate()) {
-      // Pastikan form valid sebelum menyimpan
-      final newNote = NoteModel(
-        id: _uuid.v4(), // Menghasilkan ID unik untuk catatan baru
-        title: titleController.text.trim(),
-        content: contentController.text.trim(),
-        createdAt: DateTime.now(), // Menetapkan waktu pembuatan saat ini
-        isFavorite: false, // Default: catatan baru tidak favorit
-        isArchived: false, // Default: catatan baru tidak diarsipkan
-      );
-      widget.onSave(newNote);
-      Navigator.pop(context); // Kembali ke halaman sebelumnya setelah menyimpan
+  if (_formKey.currentState!.validate()) {
+    final newNote = NoteModel(
+      id: _uuid.v4(),
+      title: titleController.text.trim(),
+      content: contentController.text.trim(),
+      createdAt: DateTime.now(),
+      isFavorite: false,
+      isArchived: false,
+    );
+    widget.onSave(newNote);
+    // Add this check
+    if (Navigator.canPop(context)) { // Check if there's a route to pop
+      Navigator.pop(context); // Go back to the previous page after saving
+    } else {
+      print('No route to pop, staying on AddNotePage or navigating manually.');
     }
   }
-
+}
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

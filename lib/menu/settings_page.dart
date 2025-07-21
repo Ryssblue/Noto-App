@@ -1,26 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:noto_app/menu/theme_settings_page.dart';
-import 'package:noto_app/menu/sync_backup_page.dart'; // Import halaman sinkronisasi
-import 'package:noto_app/menu/trash_settings_page.dart'; // Import halaman pengaturan sampah
-import 'package:noto_app/menu/export_data_page.dart'; // Import halaman ekspor data
-import 'package:noto_app/menu/import_data_page.dart'; // Import halaman impor data
+import 'package:noto_app/menu/sync_backup_page.dart';
+import 'package:noto_app/menu/trash_settings_page.dart';
+import 'package:noto_app/menu/export_data_page.dart';
+import 'package:noto_app/menu/import_data_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyLarge?.color;
+    final subtitleColor = theme.textTheme.bodyMedium?.color;
+    final iconColor = theme.iconTheme.color;
+    final dividerColor = theme.dividerColor;
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Pengaturan'),
+        title: Text('Pengaturan', style: theme.appBarTheme.titleTextStyle),
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
+        elevation: theme.appBarTheme.elevation,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
           ListTile(
-            leading: const Icon(Icons.palette),
-            title: const Text('Tampilan & Tema'),
-            subtitle: const Text('Ubah mode terang/gelap dan warna aksen'),
+            leading: Icon(Icons.palette, color: iconColor),
+            title: Text('Tampilan & Tema', style: TextStyle(color: textColor)),
+            subtitle: Text(
+              'Ubah mode terang/gelap dan warna aksen',
+              style: TextStyle(color: subtitleColor),
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -30,25 +43,35 @@ class SettingsPage extends StatelessWidget {
               );
             },
           ),
-          const Divider(),
+          Divider(color: dividerColor),
           ListTile(
-            leading: const Icon(Icons.sync),
-            title: const Text('Sinkronisasi & Cadangan'),
-            subtitle: const Text('Kelola sinkronisasi data dan cadangan cloud'),
+            leading: Icon(Icons.sync, color: iconColor),
+            title: Text(
+              'Sinkronisasi & Cadangan',
+              style: TextStyle(color: textColor),
+            ),
+            subtitle: Text(
+              'Kelola sinkronisasi data dan cadangan cloud',
+              style: TextStyle(color: subtitleColor),
+            ),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const SyncBackupPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const SyncBackupPage()),
               );
             },
           ),
-          const Divider(),
+          Divider(color: dividerColor),
           ListTile(
-            leading: const Icon(Icons.delete_sweep),
-            title: const Text('Pengaturan Sampah'),
-            subtitle: const Text('Konfigurasi retensi catatan yang dihapus'),
+            leading: Icon(Icons.delete_sweep, color: iconColor),
+            title: Text(
+              'Pengaturan Sampah',
+              style: TextStyle(color: textColor),
+            ),
+            subtitle: Text(
+              'Konfigurasi retensi catatan yang dihapus',
+              style: TextStyle(color: subtitleColor),
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -58,39 +81,44 @@ class SettingsPage extends StatelessWidget {
               );
             },
           ),
-          const Divider(),
+          Divider(color: dividerColor),
           ListTile(
-            leading: const Icon(Icons.file_upload),
-            title: const Text('Ekspor Data'),
-            subtitle: const Text('Ekspor catatan Anda ke berkas'),
+            leading: Icon(Icons.file_upload, color: iconColor),
+            title: Text('Ekspor Data', style: TextStyle(color: textColor)),
+            subtitle: Text(
+              'Ekspor catatan Anda ke berkas',
+              style: TextStyle(color: subtitleColor),
+            ),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const ExportDataPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const ExportDataPage()),
               );
             },
           ),
-          const Divider(),
+          Divider(color: dividerColor),
           ListTile(
-            leading: const Icon(Icons.file_download),
-            title: const Text('Impor Data'),
-            subtitle: const Text('Impor catatan dari berkas'),
+            leading: Icon(Icons.file_download, color: iconColor),
+            title: Text('Impor Data', style: TextStyle(color: textColor)),
+            subtitle: Text(
+              'Impor catatan dari berkas',
+              style: TextStyle(color: subtitleColor),
+            ),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const ImportDataPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const ImportDataPage()),
               );
             },
           ),
-          const Divider(),
+          Divider(color: dividerColor),
           ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('Tentang Aplikasi'),
-            subtitle: const Text('Informasi versi dan pengembang'),
+            leading: Icon(Icons.info_outline, color: iconColor),
+            title: Text('Tentang Aplikasi', style: TextStyle(color: textColor)),
+            subtitle: Text(
+              'Informasi versi dan pengembang',
+              style: TextStyle(color: subtitleColor),
+            ),
             onTap: () {
               _showAboutAppDialog(context);
             },
@@ -100,28 +128,71 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  // Fungsi pembantu untuk menampilkan dialog Tentang Aplikasi
   void _showAboutAppDialog(BuildContext context) {
-    showAboutDialog(
+    final theme = Theme.of(context);
+    final dialogBackgroundColor = theme.cardColor;
+    final dialogTitleColor = theme.textTheme.titleMedium?.color;
+    final dialogContentColor = theme.textTheme.bodyMedium?.color;
+    final dialogButtonColor = theme.textButtonTheme.style?.foregroundColor
+        ?.resolve({});
+
+    // Use showDialog to customize the AlertDialog properties directly
+    showDialog(
       context: context,
-      applicationName: 'Noto App',
-      applicationVersion: '1.0.0', // Ganti dengan versi aplikasi Anda
-      applicationLegalese: '© 2024 Noto App. All rights reserved.',
-      children: <Widget>[
-        const Padding(
-          padding: EdgeInsets.only(top: 16.0),
-          child: Text(
-            'Aplikasi catatan sederhana untuk membantu Anda mengatur pikiran.',
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          // Directly set background color
+          backgroundColor: dialogBackgroundColor,
+          // Set the title
+          title: Text(
+            'Tentang Aplikasi Noto', // More specific title for AboutDialog
+            style: TextStyle(color: dialogTitleColor),
           ),
-        ),
-        const Padding(
-          padding: EdgeInsets.only(top: 8.0),
-          child: Text(
-            'Dikembangkan oleh: Your Name/Team Name', // Ganti dengan nama Anda/tim Anda
-            style: TextStyle(fontSize: 12.0),
+          // Set the content
+          content: SingleChildScrollView(
+            // Use SingleChildScrollView if content might overflow
+            child: ListBody(
+              children: <Widget>[
+                // Optional: Add an application icon at the top of the content
+                Center(
+                  child: Icon(
+                    Icons.info,
+                    size: 48,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Aplikasi catatan sederhana untuk membantu Anda mengatur pikiran.',
+                  style: TextStyle(color: dialogContentColor),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Versi: 1.0.0', // Directly show version here if needed
+                  style: TextStyle(fontSize: 12.0, color: dialogContentColor),
+                ),
+                Text(
+                  '© 2025 Noto App. All rights reserved.',
+                  style: TextStyle(fontSize: 12.0, color: dialogContentColor),
+                ),
+                Text(
+                  'Dikembangkan oleh: DPM Barokah',
+                  style: TextStyle(fontSize: 12.0, color: dialogContentColor),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+          // Set actions (buttons)
+          actions: <Widget>[
+            TextButton(
+              child: Text('Tutup', style: TextStyle(color: dialogButtonColor)),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

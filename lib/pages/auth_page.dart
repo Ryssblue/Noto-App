@@ -75,6 +75,22 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Determine if dark mode is active
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Define colors based on theme.
+    // Ensure these are always non-null Colors.
+    final Color cardColor = isDarkMode ? const Color(0xFF2C2C2C) : Colors.white;
+    final Color textColor = isDarkMode ? Colors.white : Colors.black;
+    final Color hintColor = isDarkMode
+        ? Colors
+              .grey[400]! // Using ! because Colors.grey[shade] can return null. Here we assert it won't.
+        : Colors.grey[700]!; // It's safer to use .shadeValue if you're sure.
+    final Color borderColor = isDarkMode
+        ? Colors.grey[600]!
+        : Colors.grey; // Colors.grey is non-nullable.
+    final Color iconColor = isDarkMode ? Colors.grey[400]! : Colors.grey[700]!;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -102,7 +118,15 @@ class _AuthPageState extends State<AuthPage> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  _buildAuthCard(),
+                  // Pass theme colors directly without null assertion operator (!)
+                  _buildAuthCard(
+                    isDarkMode,
+                    cardColor,
+                    textColor,
+                    hintColor,
+                    borderColor,
+                    iconColor,
+                  ),
                   const SizedBox(height: 20),
                   TextButton(
                     onPressed: _toggleForm,
@@ -124,30 +148,57 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
-  Widget _buildAuthCard() {
+  Widget _buildAuthCard(
+    bool isDarkMode,
+    Color cardColor,
+    Color textColor,
+    Color hintColor,
+    Color borderColor,
+    Color iconColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(color: Colors.blue, blurRadius: 12, offset: Offset(0, 6)),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode ? Colors.black54 : Colors.blue.withOpacity(0.5),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
         ],
       ),
       child: Column(
         children: [
           Text(
             isLogin ? 'Selamat Datang Kembali!' : 'Buat Akun Baru',
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
           ),
           const SizedBox(height: 24),
           if (!isLogin) ...[
             TextFormField(
               controller: nameController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Nama Lengkap',
-                border: OutlineInputBorder(),
+                hintStyle: TextStyle(color: hintColor),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
               ),
+              style: TextStyle(color: textColor),
               validator: (value) => (value == null || value.isEmpty)
                   ? 'Nama tidak boleh kosong'
                   : null,
@@ -156,10 +207,22 @@ class _AuthPageState extends State<AuthPage> {
           ],
           TextFormField(
             controller: emailController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Email',
-              border: OutlineInputBorder(),
+              hintStyle: TextStyle(color: hintColor),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ),
+            style: TextStyle(color: textColor),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Email tidak boleh kosong';
@@ -176,11 +239,22 @@ class _AuthPageState extends State<AuthPage> {
             obscureText: obscurePassword,
             decoration: InputDecoration(
               hintText: 'Password',
-              border: const OutlineInputBorder(),
+              hintStyle: TextStyle(color: hintColor),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
               suffixIcon: IconButton(
                 icon: Icon(
                   obscurePassword ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.grey[700],
+                  color: iconColor,
                 ),
                 onPressed: () {
                   setState(() {
@@ -189,40 +263,55 @@ class _AuthPageState extends State<AuthPage> {
                 },
               ),
             ),
+            style: TextStyle(color: textColor),
             validator: (value) => (value == null || value.isEmpty)
                 ? 'Password tidak boleh kosong'
                 : null,
           ),
           const SizedBox(height: 16),
-
-         if (!isLogin)
-          TextFormField(
-            controller: confirmPasswordController,
-            obscureText: obscureConfirmPassword,
-            decoration: InputDecoration(
-              hintText: 'Konfirmasi Password',
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.grey[700],
+          if (!isLogin)
+            TextFormField(
+              controller: confirmPasswordController,
+              obscureText: obscureConfirmPassword,
+              decoration: InputDecoration(
+                hintText: 'Konfirmasi Password',
+                hintStyle: TextStyle(color: hintColor),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: borderColor),
                 ),
-                onPressed: () {
-                  setState(() => obscureConfirmPassword = !obscureConfirmPassword);
-                },
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    obscureConfirmPassword
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: iconColor,
+                  ),
+                  onPressed: () {
+                    setState(
+                      () => obscureConfirmPassword = !obscureConfirmPassword,
+                    );
+                  },
+                ),
               ),
+              style: TextStyle(color: textColor),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Konfirmasi password tidak boleh kosong';
+                }
+                if (value != passwordController.text) {
+                  return 'Password tidak cocok';
+                }
+                return null;
+              },
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Konfirmasi password tidak boleh kosong';
-              }
-              if (value != passwordController.text) {
-                return 'Password tidak cocok';
-              }
-              return null;
-            },
-          ),
-
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,

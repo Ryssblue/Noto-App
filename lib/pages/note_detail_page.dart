@@ -1,6 +1,8 @@
+import 'dart:io'; // Import for File
 import 'package:flutter/material.dart';
 import '../models/note_model.dart';
 import 'edit_note_page.dart';
+import 'package:intl/intl.dart';
 
 class NoteDetailPage extends StatefulWidget {
   // Menerima data catatan dari halaman sebelumnya (HomePage)
@@ -27,7 +29,9 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
     // Tunggu hasil dari EditNotePage
     final updatedNote = await Navigator.push<NoteModel>(
       context,
-      MaterialPageRoute(builder: (_) => EditNotePage(note: _note)),
+      MaterialPageRoute(
+        builder: (_) => EditNotePage(note: NoteModel.fromMap(_note.toMap())),
+      ),
     );
 
     // Jika ada data yang dikembalikan (catatan diperbarui),
@@ -70,11 +74,47 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
                 ),
               ),
               const SizedBox(height: 16),
+
+              // --- BAGIAN BARU: Tampilkan Gambar jika ada ---
+              if (_note.imagePath != null && _note.imagePath!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      File(_note.imagePath!),
+                      width: double.infinity,
+                      fit: BoxFit
+                          .fitWidth, // Atau BoxFit.cover sesuai preferensi
+                      errorBuilder: (context, error, stackTrace) {
+                        return SizedBox(
+                          height: 150,
+                          child: Center(
+                            child: Text(
+                              'Gagal memuat gambar',
+                              style: TextStyle(color: theme.colorScheme.error),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              // --- AKHIR BAGIAN BARU ---
+
               // Menampilkan seluruh konten catatan
               Text(
                 _note.content,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   height: 1.5, // Atur jarak antar baris agar mudah dibaca
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Tambahkan informasi lain seperti tanggal dibuat jika diperlukan
+              Text(
+                'Dibuat pada: ${DateFormat('dd MMM yyyy, HH:mm').format(_note.createdAt)}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.hintColor,
                 ),
               ),
             ],

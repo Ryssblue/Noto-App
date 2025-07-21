@@ -99,18 +99,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _editNote(int originalIndex) async {
-    // Menunggu hasil dari EditNotePage (catatan yang sudah diedit)
-    // Karena NoteModel diteruskan sebagai referensi, perubahan di EditNotePage
-    // langsung memengaruhi objek di `notes[originalIndex]`.
-    // Kita hanya perlu await untuk memastikan EditNotePage selesai,
-    // lalu panggil _saveNotes() untuk menyimpan perubahan tersebut.
     await Navigator.push<NoteModel>(
       context,
       MaterialPageRoute(
         builder: (_) => EditNotePage(note: notes[originalIndex]),
       ),
     );
-    // ✅ PERBAIKAN PENTING: Panggil _saveNotes() setelah EditNotePage selesai
     await _saveNotes();
     await _refreshNotes(); // Muat ulang dan filter catatan untuk memperbarui UI
     if (mounted) {
@@ -120,43 +114,53 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Existing _deleteNote function
   void _deleteNote(int originalIndex) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
-        // Add BuildContext type hint
+        // Ambil tema untuk Alert Dialog
+        final dialogTheme = Theme.of(context);
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-          ), // Softer corners
+          ),
+          // Set background color for AlertDialog to follow theme
+          backgroundColor:
+              dialogTheme.cardColor, // Use cardColor for dialog background
           title: Row(
-            // Add an icon to the title
             children: [
               Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
               SizedBox(width: 10),
               Text(
                 'Hapus Catatan',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: dialogTheme.textTheme.titleLarge?.color,
+                ), // Adjust text color
               ),
             ],
           ),
           content: Text(
-            'Apakah Anda yakin ingin menghapus catatan ini? Tindakan ini tidak dapat dibatalkan.', // More descriptive text
-            style: TextStyle(fontSize: 16),
+            'Apakah Anda yakin ingin menghapus catatan ini? Tindakan ini tidak dapat dibatalkan.',
+            style: TextStyle(
+              fontSize: 16,
+              color: dialogTheme.textTheme.bodyMedium?.color,
+            ), // Adjust text color
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text(
+              child: Text(
                 'Batal',
-                style: TextStyle(color: Colors.grey), // Muted color for cancel
+                style: TextStyle(
+                  color: dialogTheme.hintColor,
+                ), // Use hintColor for muted text
               ),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, // Prominent red for delete
+                backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -180,33 +184,39 @@ class _HomePageState extends State<HomePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Catatan berhasil dihapus!'),
-            backgroundColor: Colors.red, // Green feedback for success
+            backgroundColor: Colors.red,
           ),
         );
       }
     }
   }
 
-  // Fungsi untuk mengarsipkan catatan
   void _archiveNote(int originalIndex) {
     setState(() {
-      notes[originalIndex].toggleArchive(); // Mengubah status isArchived
+      notes[originalIndex].toggleArchive();
     });
     _saveNotes();
-    _filterNotes(); // Perbarui daftar catatan yang ditampilkan (sembunyikan yang diarsipkan)
+    _filterNotes();
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Catatan diarsipkan!')));
   }
 
   Widget _buildNoteList() {
+    // Get text colors from theme
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+
     if (filteredNotes.isEmpty) {
       return Center(
         child: Text(
           _searchController.text.isEmpty
               ? 'Belum ada catatan.'
               : 'Catatan tidak ditemukan.',
-          style: const TextStyle(color: Colors.grey, fontSize: 16),
+          style: TextStyle(
+            color: textColor?.withOpacity(0.6),
+            fontSize: 16,
+          ), // Use theme color with opacity
         ),
       );
     }
@@ -216,9 +226,7 @@ class _HomePageState extends State<HomePage> {
       itemCount: filteredNotes.length,
       itemBuilder: (context, index) {
         final note = filteredNotes[index];
-        final originalIndex = notes.indexOf(
-          note,
-        ); // Dapatkan indeks di daftar `notes` asli
+        final originalIndex = notes.indexOf(note);
 
         return NoteCard(
           note: note,
@@ -226,7 +234,7 @@ class _HomePageState extends State<HomePage> {
           onEdit: () => _editNote(originalIndex),
           onDelete: () => _deleteNote(originalIndex),
           onToggleFavorite: () => _toggleFavorite(originalIndex),
-          onArchive: () => _archiveNote(originalIndex), // Panggil fungsi arsip
+          onArchive: () => _archiveNote(originalIndex),
         );
       },
     );
@@ -242,7 +250,7 @@ class _HomePageState extends State<HomePage> {
               notes.add(newNote);
             });
             await _saveNotes();
-            _filterNotes(); // Re-filter untuk menyertakan catatan baru dalam daftar yang ditampilkan
+            _filterNotes();
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Catatan ditambahkan!')),
@@ -264,80 +272,118 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Use colors from the theme
+    final scaffoldBgColor = theme.scaffoldBackgroundColor;
+    final appBarBgColor = theme.appBarTheme.backgroundColor;
+    final appBarFgColor = theme.appBarTheme.foregroundColor;
+    final drawerHeaderColor =
+        theme.primaryColor; // Or a specific color from your theme
+    final drawerItemColor = theme
+        .textTheme
+        .bodyMedium
+        ?.color; // Color for drawer list tile text/icons
+    final floatingActionButtonColor =
+        theme.colorScheme.secondary; // Usually secondary color
+    final floatingActionButtonIconColor =
+        theme.colorScheme.onSecondary; // Color for icon on secondary color
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: scaffoldBgColor,
       appBar: AppBar(
-        title: const Text("Noto"),
+        title: Text(
+          "Noto",
+          style: TextStyle(color: appBarFgColor),
+        ), // Ensure title color adjusts
         elevation: 0,
-        backgroundColor: theme.scaffoldBackgroundColor,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: appBarBgColor, // Use theme color for AppBar background
+        surfaceTintColor:
+            Colors.transparent, // Keep this transparent or set based on theme
+        iconTheme: IconThemeData(
+          color: appBarFgColor,
+        ), // Adjust leading icon color
       ),
       drawer: Drawer(
+        // Set drawer background color to match app's overall theme or a specific dark variant
+        backgroundColor: theme
+            .scaffoldBackgroundColor, // Or theme.cardColor for a slightly different shade
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: const BoxDecoration(color: Colors.indigo),
+              decoration: BoxDecoration(
+                color: drawerHeaderColor,
+              ), // Use theme color
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.person, size: 48, color: Colors.white),
-                  const SizedBox(height: 8),
+                  Icon(
+                    Icons.person,
+                    size: 48,
+                    color: Colors.white,
+                  ), // Icons in DrawerHeader often stay white for contrast
+                  SizedBox(height: 8),
                   Text(
                     'Halo, $userName',
-                    style: const TextStyle(color: Colors.white, fontSize: 20),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                    ), // Text in DrawerHeader often stays white
                   ),
                 ],
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Beranda'),
+              leading: Icon(Icons.home, color: drawerItemColor),
+              title: Text('Beranda', style: TextStyle(color: drawerItemColor)),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: const Icon(Icons.star_border),
-              title: const Text('Favorit'),
+              leading: Icon(Icons.star_border, color: drawerItemColor),
+              title: Text('Favorit', style: TextStyle(color: drawerItemColor)),
               onTap: () async {
-                Navigator.pop(context); // Tutup drawer
+                Navigator.pop(context);
                 await Navigator.push(
                   context,
-                  // Kirim semua catatan ke FavoritesPage agar bisa difilter
                   MaterialPageRoute(
                     builder: (_) => FavoritesPage(allNotes: notes),
                   ),
                 );
-                _refreshNotes(); // Muat ulang catatan setelah kembali
+                _refreshNotes();
               },
             ),
-            const Divider(),
+            Divider(
+              color: drawerItemColor?.withOpacity(0.3),
+            ), // Theme-aware divider
             ListTile(
-              leading: const Icon(Icons.archive_outlined),
-              title: const Text('Arsip'),
+              leading: Icon(Icons.archive_outlined, color: drawerItemColor),
+              title: Text('Arsip', style: TextStyle(color: drawerItemColor)),
               onTap: () async {
-                Navigator.pop(context); // Tutup drawer
+                Navigator.pop(context);
                 await Navigator.push(
                   context,
-                  // Kirim semua catatan ke ArchivedNotesPage
                   MaterialPageRoute(
                     builder: (_) => ArchivedNotesPage(allNotes: notes),
                   ),
                 );
-                _refreshNotes(); // Muat ulang catatan setelah kembali
+                _refreshNotes();
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete_outline),
-              title: const Text('Sampah'),
+              leading: Icon(Icons.delete_outline, color: drawerItemColor),
+              title: Text('Sampah', style: TextStyle(color: drawerItemColor)),
               onTap: () {
                 // TODO: Navigasi ke Halaman Sampah
               },
             ),
-            const Divider(),
+            Divider(
+              color: drawerItemColor?.withOpacity(0.3),
+            ), // Theme-aware divider
             ListTile(
-              leading: const Icon(Icons.settings_outlined),
-              title: const Text('Pengaturan'),
+              leading: Icon(Icons.settings_outlined, color: drawerItemColor),
+              title: Text(
+                'Pengaturan',
+                style: TextStyle(color: drawerItemColor),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -347,8 +393,8 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
+              leading: Icon(Icons.logout, color: drawerItemColor),
+              title: Text('Logout', style: TextStyle(color: drawerItemColor)),
               onTap: _logout,
             ),
           ],
@@ -363,6 +409,10 @@ class _HomePageState extends State<HomePage> {
               'Selamat datang, $userName 👋',
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: theme
+                    .textTheme
+                    .headlineSmall
+                    ?.color, // Ensure color is taken from theme
               ),
             ),
             const SizedBox(height: 16),
@@ -370,19 +420,31 @@ class _HomePageState extends State<HomePage> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Cari catatan...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: theme.hintColor,
+                ), // Use theme hintColor for icon
                 filled: true,
-                fillColor: theme.cardColor,
+                // inputDecorationTheme.fillColor from main.dart is already handled by InputDecoration
+                // So, no need to manually set fillColor here unless you want to override it.
+                // If you want it to use theme.cardColor as before, uncomment below:
+                // fillColor: theme.cardColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
+                hintStyle: TextStyle(
+                  color: theme.hintColor,
+                ), // Ensure hint text color adjusts
+                // The border styles (focusedBorder, enabledBorder) are already defined in InputDecorationTheme in main.dart
               ),
+              style: TextStyle(
+                color: theme.textTheme.bodyMedium?.color,
+              ), // Ensure input text color adjusts
             ),
             const SizedBox(height: 16),
             Expanded(
               child: RefreshIndicator(
-                // Tambahkan RefreshIndicator untuk pull-to-refresh
                 onRefresh: _refreshNotes,
                 child: _buildNoteList(),
               ),
@@ -393,6 +455,9 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddNote,
         tooltip: 'Tambah Catatan',
+        backgroundColor: floatingActionButtonColor, // Use theme color
+        foregroundColor:
+            floatingActionButtonIconColor, // Use theme color for icon
         child: const Icon(Icons.add),
       ),
     );

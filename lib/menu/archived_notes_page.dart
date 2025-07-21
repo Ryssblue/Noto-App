@@ -16,9 +16,6 @@ class ArchivedNotesPage extends StatefulWidget {
 }
 
 class _ArchivedNotesPageState extends State<ArchivedNotesPage> {
-  // Gunakan 'late' karena akan diinisialisasi di initState,
-  // atau jadikan nullable jika tidak selalu ada data awal.
-  // Untuk kasus ini, 'late' aman karena allNotes selalu dikirim.
   late List<NoteModel> _editableAllNotes; // Salinan catatan yang bisa diedit
 
   List<NoteModel> archivedNotes = [];
@@ -26,9 +23,6 @@ class _ArchivedNotesPageState extends State<ArchivedNotesPage> {
   @override
   void initState() {
     super.initState();
-    // Penting: Buat salinan yang bisa diubah dari daftar yang diterima.
-    // Ini agar perubahan yang dilakukan di halaman arsip tidak langsung
-    // memengaruhi daftar 'notes' di HomePage sebelum disimpan.
     _editableAllNotes = List<NoteModel>.from(widget.allNotes);
     _filterArchivedNotes();
   }
@@ -36,7 +30,6 @@ class _ArchivedNotesPageState extends State<ArchivedNotesPage> {
   @override
   void didUpdateWidget(covariant ArchivedNotesPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Perbarui salinan lokal jika daftar 'allNotes' yang diterima dari widget berubah
     if (widget.allNotes != oldWidget.allNotes) {
       _editableAllNotes = List<NoteModel>.from(widget.allNotes);
       _filterArchivedNotes();
@@ -51,18 +44,16 @@ class _ArchivedNotesPageState extends State<ArchivedNotesPage> {
     });
   }
 
-  /// Mengembalikan catatan dari arsip ke status tidak diarsipkan.
   Future<void> _unarchiveNote(NoteModel noteToUnarchive) async {
     setState(() {
       final index = _editableAllNotes.indexWhere(
         (note) => note.id == noteToUnarchive.id,
       );
       if (index != -1) {
-        _editableAllNotes[index].toggleArchive(); // Ubah status arsip
-        _filterArchivedNotes(); // Perbarui daftar catatan di halaman ini
+        _editableAllNotes[index].toggleArchive();
+        _filterArchivedNotes();
       }
     });
-    // Simpan perubahan ke SharedPreferences setelah setState selesai
     await _saveNotes(_editableAllNotes);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -75,33 +66,66 @@ class _ArchivedNotesPageState extends State<ArchivedNotesPage> {
   Future<void> _deleteNotePermanently(NoteModel noteToDelete) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Hapus Permanen'),
-        content: const Text(
-          'Yakin ingin menghapus catatan ini secara permanen? Aksi ini tidak bisa dibatalkan.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
+      builder: (BuildContext dialogContext) {
+        // Use dialogContext to avoid conflicts
+        // Ambil ThemeData dari dialogContext untuk tema AlertDialog
+        final theme = Theme.of(dialogContext);
+        final dialogTextColor = theme.textTheme.titleMedium?.color; // For title
+        final dialogContentColor =
+            theme.textTheme.bodyMedium?.color; // For content
+        final buttonCancelColor = theme.hintColor; // For cancel button text
+
+        return AlertDialog(
+          // Set background color for AlertDialog to follow theme
+          backgroundColor:
+              theme.cardColor, // Use cardColor for dialog background
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ), // Beri warna merah untuk aksi hapus
-            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+          title: Text(
+            'Hapus Permanen',
+            style: TextStyle(color: dialogTextColor), // Apply theme text color
           ),
-        ],
-      ),
+          content: Text(
+            'Yakin ingin menghapus catatan ini secara permanen? Aksi ini tidak bisa dibatalkan.',
+            style: TextStyle(
+              color: dialogContentColor,
+            ), // Apply theme text color
+          ),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(dialogContext, false), // Use dialogContext here
+              child: Text(
+                'Batal',
+                style: TextStyle(
+                  color: buttonCancelColor,
+                ), // Apply theme text color
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () =>
+                  Navigator.pop(dialogContext, true), // Use dialogContext here
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    Colors.red, // Keep red for prominent delete action
+                foregroundColor: Colors.white, // Keep white text on red button
+              ),
+              child: const Text(
+                'Hapus',
+                style: TextStyle(color: Colors.white),
+              ), // Text color on red button remains white
+            ),
+          ],
+        );
+      },
     );
 
     if (confirm == true) {
       setState(() {
         _editableAllNotes.removeWhere((note) => note.id == noteToDelete.id);
-        _filterArchivedNotes(); // Perbarui daftar catatan di halaman ini
+        _filterArchivedNotes();
       });
-      // Simpan perubahan ke SharedPreferences setelah setState selesai
       await _saveNotes(_editableAllNotes);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -111,18 +135,14 @@ class _ArchivedNotesPageState extends State<ArchivedNotesPage> {
     }
   }
 
-  /// Menyimpan semua catatan dari [_editableAllNotes] ke SharedPreferences.
   Future<void> _saveNotes(List<NoteModel> notesToSave) async {
     final prefs = await SharedPreferences.getInstance();
-    // Pastikan `toMap()` ada di NoteModel Anda dan mengembalikan Map<String, dynamic>
-    // Kemudian encode setiap map ke JSON string
     final jsonList = notesToSave
         .map((note) => json.encode(note.toMap()))
         .toList();
     await prefs.setStringList('notes', jsonList);
   }
 
-  /// Menavigasi ke halaman detail catatan.
   void _viewNote(NoteModel note) {
     Navigator.push(
       context,
@@ -132,13 +152,34 @@ class _ArchivedNotesPageState extends State<ArchivedNotesPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Access the current theme for this page's general elements
+    final theme = Theme.of(context);
+    final emptyListTextColor = theme.textTheme.bodyMedium?.color;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Arsip')),
+      backgroundColor: theme
+          .scaffoldBackgroundColor, // Ensure Scaffold background follows theme
+      appBar: AppBar(
+        title: Text(
+          'Arsip',
+          style: theme.appBarTheme.titleTextStyle,
+        ), // Use AppBarTheme's text style
+        backgroundColor: theme
+            .appBarTheme
+            .backgroundColor, // Use AppBarTheme's background color
+        foregroundColor: theme
+            .appBarTheme
+            .foregroundColor, // Use AppBarTheme's foreground color for icons/text
+        elevation: theme.appBarTheme.elevation,
+      ),
       body: archivedNotes.isEmpty
-          ? const Center(
+          ? Center(
               child: Text(
                 'Belum ada catatan di arsip.',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+                style: TextStyle(
+                  color: emptyListTextColor?.withOpacity(0.6),
+                  fontSize: 16,
+                ), // Apply theme text color with opacity
               ),
             )
           : ListView.builder(
@@ -149,18 +190,16 @@ class _ArchivedNotesPageState extends State<ArchivedNotesPage> {
                 return NoteCard(
                   note: note,
                   onTap: () => _viewNote(note),
-                  // Aksi untuk 'Edit' sekarang menjadi 'Unarchive'
                   onEdit: () => _unarchiveNote(note),
-                  // Aksi untuk 'Delete' sekarang menjadi 'Delete Permanently'
                   onDelete: () => _deleteNotePermanently(note),
                   onToggleFavorite: () {
-                    // Anda bisa menambahkan fungsionalitas favorit/unfavorit di sini
-                    // jika diperlukan, dan pastikan untuk memanggil _saveNotes(_editableAllNotes)
+                    // You might want to implement this if favorites can be toggled in archive
+                    // note.toggleFavorite();
+                    // _saveNotes(_editableAllNotes);
+                    // _filterArchivedNotes();
                   },
-                  // Menggunakan ikon kustom dari NoteCard
-                  editIcon: Icons.unarchive, // Ikon untuk 'Unarchive'
-                  deleteIcon:
-                      Icons.delete_forever, // Ikon untuk 'Delete Permanently'
+                  editIcon: Icons.unarchive,
+                  deleteIcon: Icons.delete_forever,
                 );
               },
             ),

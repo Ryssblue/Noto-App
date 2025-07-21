@@ -1,11 +1,14 @@
+// models/note_model.dart
+import 'package:uuid/uuid.dart'; // Pastikan ini ada jika Anda menggunakan UUID
+
 class NoteModel {
   String id;
-  String title; // Dibuat tidak final agar bisa diubah
-  String content; // Dibuat tidak final agar bisa diubah
+  String title;
+  String content;
   DateTime createdAt;
   bool isFavorite;
   bool isArchived;
-  String? category;
+  String? imagePath; // <--- TAMBAHKAN PROPERTI INI
 
   NoteModel({
     required this.id,
@@ -14,20 +17,23 @@ class NoteModel {
     required this.createdAt,
     this.isFavorite = false,
     this.isArchived = false,
-    this.category,
+    this.imagePath, // <--- TAMBAHKAN KE KONSTRUKTOR
   });
 
-  // Method untuk mengubah status favorit
-  void toggleFavorite() {
-    isFavorite = !isFavorite;
+  // Konversi dari Map (saat memuat dari SharedPreferences)
+  factory NoteModel.fromMap(Map<String, dynamic> map) {
+    return NoteModel(
+      id: map['id'],
+      title: map['title'],
+      content: map['content'],
+      createdAt: DateTime.parse(map['createdAt']),
+      isFavorite: map['isFavorite'] ?? false,
+      isArchived: map['isArchived'] ?? false,
+      imagePath: map['imagePath'], // <--- PASTIKAN INI ADA SAAT MEMUAT
+    );
   }
 
-  // Method untuk mengubah status arsip
-  void toggleArchive() {
-    isArchived = !isArchived;
-  }
-
-  // Konversi dari NoteModel ke Map untuk disimpan
+  // Konversi ke Map (saat menyimpan ke SharedPreferences)
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -36,19 +42,15 @@ class NoteModel {
       'createdAt': createdAt.toIso8601String(),
       'isFavorite': isFavorite,
       'isArchived': isArchived,
-      'category': category,
+      'imagePath': imagePath, // <--- PASTIKAN INI ADA SAAT MENYIMPAN
     };
   }
 
-  // Konversi dari Map ke NoteModel saat dimuat
-  factory NoteModel.fromMap(Map<String, dynamic> map) {
-    return NoteModel(
-      id: map['id'] as String,
-      title: map['title'] as String,
-      content: map['content'] as String,
-      createdAt: DateTime.parse(map['createdAt'] as String),
-      isFavorite: map['isFavorite'] ?? false,
-      isArchived: map['isArchived'] ?? false,
-    );
+  void toggleFavorite() {
+    isFavorite = !isFavorite;
+  }
+
+  void toggleArchive() {
+    isArchived = !isArchived;
   }
 }

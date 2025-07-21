@@ -1,6 +1,7 @@
 // widgets/note_card.dart
+import 'dart:io'; // Import untuk File
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Untuk format tanggal
+import 'package:intl/intl.dart';
 import '../models/note_model.dart';
 
 class NoteCard extends StatelessWidget {
@@ -9,10 +10,9 @@ class NoteCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onToggleFavorite;
-  final VoidCallback? onArchive; // Callback untuk aksi Arsipkan
-  final IconData? editIcon; // Ikon kustom untuk aksi "Edit" (misal: unarchive)
-  final IconData?
-  deleteIcon; // Ikon kustom untuk aksi "Delete" (misal: delete_forever)
+  final VoidCallback? onArchive;
+  final IconData? editIcon;
+  final IconData? deleteIcon;
 
   const NoteCard({
     Key? key,
@@ -28,56 +28,53 @@ class NoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final hintColor = theme.hintColor;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      color: theme.cardColor,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            12,
-            16,
-            12,
-          ), // Padding utama kartu
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Bagian Judul, Tombol Favorit, dan Menu Titik Tiga (semua dalam satu baris)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment:
-                    CrossAxisAlignment.center, // Pusatkan secara vertikal
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
-                    // Judul mengambil ruang yang tersedia
                     child: Text(
                       note.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: textColor,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  // Tombol Favorit
                   IconButton(
                     icon: Icon(
                       note.isFavorite ? Icons.star : Icons.star_border,
-                      color: note.isFavorite ? Colors.amber : Colors.grey,
+                      color: note.isFavorite ? Colors.amber : hintColor,
                     ),
                     onPressed: onToggleFavorite,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(
                       minWidth: 24,
                       minHeight: 24,
-                    ), // Ukuran ikon lebih ringkas
+                    ),
                   ),
-                  // Menu Titik Tiga
                   PopupMenuButton<String>(
+                    color: theme.cardColor,
                     onSelected: (value) {
                       if (value == 'edit') {
                         onEdit();
@@ -105,9 +102,12 @@ class NoteCard extends StatelessWidget {
                           value: 'edit',
                           child: Row(
                             children: [
-                              Icon(currentEditIcon),
+                              Icon(currentEditIcon, color: textColor),
                               const SizedBox(width: 8),
-                              Text(editText),
+                              Text(
+                                editText,
+                                style: TextStyle(color: textColor),
+                              ),
                             ],
                           ),
                         ),
@@ -115,20 +115,26 @@ class NoteCard extends StatelessWidget {
                           value: 'delete',
                           child: Row(
                             children: [
-                              Icon(currentDeleteIcon),
+                              Icon(currentDeleteIcon, color: textColor),
                               const SizedBox(width: 8),
-                              Text(deleteText),
+                              Text(
+                                deleteText,
+                                style: TextStyle(color: textColor),
+                              ),
                             ],
                           ),
                         ),
                         if (onArchive != null && !note.isArchived)
-                          const PopupMenuItem<String>(
+                          PopupMenuItem<String>(
                             value: 'archive',
                             child: Row(
                               children: [
-                                Icon(Icons.archive_outlined),
-                                SizedBox(width: 8),
-                                Text('Arsipkan'),
+                                Icon(Icons.archive_outlined, color: textColor),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Arsipkan',
+                                  style: TextStyle(color: textColor),
+                                ),
                               ],
                             ),
                           ),
@@ -137,23 +143,58 @@ class NoteCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 4,
-              ), // Spasi antara baris judul/ikon dan konten
-              // 2. Konten (tepat di bawah judul)
+              const SizedBox(height: 4),
+
+              // --- BAGIAN BARU: Tampilkan Gambar jika ada ---
+              if (note.imagePath != null && note.imagePath!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: 8.0,
+                  ), // Spasi di bawah gambar
+                  child: ClipRRect(
+                    // Untuk sudut melengkung pada gambar
+                    borderRadius: BorderRadius.circular(
+                      8,
+                    ), // Sudut lebih kecil dari Card
+                    child: Image.file(
+                      File(note.imagePath!), // Menggunakan File dari dart:io
+                      height: 120, // Tinggi pratinjau gambar
+                      width: double.infinity, // Lebar penuh kartu
+                      fit: BoxFit
+                          .cover, // Gambar akan mengisi area tanpa distorsi
+                      errorBuilder: (context, error, stackTrace) {
+                        // Penanganan error jika gambar tidak dapat dimuat
+                        return Container(
+                          height: 120,
+                          color: theme
+                              .colorScheme
+                              .errorContainer, // Warna error container dari tema
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Gagal memuat gambar',
+                            style: TextStyle(
+                              color: theme.colorScheme.onErrorContainer,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+              // --- AKHIR BAGIAN BARU ---
               Text(
                 note.content,
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(fontSize: 14, color: textColor),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4), // Spasi antara konten dan tanggal
-              // 3. Tanggal (tetap di kanan bawah)
+              const SizedBox(height: 2),
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
                   DateFormat('dd MMM yyyy').format(note.createdAt),
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, color: hintColor),
                 ),
               ),
             ],

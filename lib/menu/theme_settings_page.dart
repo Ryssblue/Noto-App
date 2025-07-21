@@ -9,47 +9,84 @@ class ThemeSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Dapatkan ThemeProvider dari konteks
     final themeProvider = Provider.of<ThemeProvider>(context);
+    // Dapatkan ThemeData dari konteks saat ini
+    final theme = Theme.of(context);
+
+    // Ambil warna dari tema untuk konsistensi
+    final textColor = theme.textTheme.bodyLarge?.color;
+    final subtitleColor = theme.textTheme.bodyMedium?.color;
+    final iconColor = theme.iconTheme.color;
+    final dividerColor = theme.dividerColor;
+    final radioActiveColor =
+        theme.colorScheme.primary; // Warna untuk RadioListTile yang aktif
 
     return Scaffold(
+      backgroundColor: theme
+          .scaffoldBackgroundColor, // Background Scaffold menyesuaikan tema
       appBar: AppBar(
-        title: const Text('Pengaturan Tema'),
+        title: Text(
+          'Pengaturan Tema',
+          style: theme
+              .appBarTheme
+              .titleTextStyle, // Judul AppBar menyesuaikan tema
+        ),
+        backgroundColor: theme
+            .appBarTheme
+            .backgroundColor, // Background AppBar menyesuaikan tema
+        foregroundColor: theme
+            .appBarTheme
+            .foregroundColor, // Warna ikon/teks AppBar menyesuaikan tema
+        elevation: theme.appBarTheme.elevation,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          // RadioListTile untuk Mode Tema
           _buildThemeModeOption(
             context,
             'Mode Terang',
             ThemeMode.light,
             themeProvider,
+            textColor,
+            radioActiveColor,
           ),
           _buildThemeModeOption(
             context,
             'Mode Gelap',
             ThemeMode.dark,
             themeProvider,
+            textColor,
+            radioActiveColor,
           ),
           _buildThemeModeOption(
             context,
             'Ikuti Sistem',
             ThemeMode.system,
             themeProvider,
+            textColor,
+            radioActiveColor,
           ),
-          const Divider(),
+          Divider(color: dividerColor), // Divider menyesuaikan tema
           // TODO: Implementasi pilihan warna aksen
-          // Ini akan menjadi sedikit lebih kompleks karena Anda perlu menyimpan warna
-          // dan menerapkannya ke ThemeData. Anda bisa menggunakan ColorPicker
-          // atau daftar warna prasetel.
           ListTile(
-            title: const Text('Warna Aksen'),
-            subtitle: const Text('Pilih warna aksen aplikasi Anda'),
+            leading: Icon(
+              Icons.color_lens,
+              color: iconColor,
+            ), // Ikon menyesuaikan tema
+            title: Text(
+              'Warna Aksen',
+              style: TextStyle(color: textColor),
+            ), // Teks menyesuaikan tema
+            subtitle: Text(
+              'Pilih warna aksen aplikasi Anda',
+              style: TextStyle(color: subtitleColor),
+            ), // Subtitle menyesuaikan tema
             trailing: CircleAvatar(
-              backgroundColor: Theme.of(context).primaryColor, // Tampilkan warna aksen saat ini
+              backgroundColor: theme
+                  .primaryColor, // Tampilkan warna aksen saat ini dari tema
               radius: 16,
             ),
             onTap: () {
-              // Contoh: Menampilkan dialog pemilihan warna
-              // Anda perlu mengimplementasikan dialog ini dan logika penyimpanannya
               _showColorPickerDialog(context, themeProvider);
             },
           ),
@@ -64,9 +101,14 @@ class ThemeSettingsPage extends StatelessWidget {
     String title,
     ThemeMode mode,
     ThemeProvider themeProvider,
+    Color? textColor, // Tambahkan parameter warna teks
+    Color? activeColor, // Tambahkan parameter warna aktif Radio
   ) {
     return RadioListTile<ThemeMode>(
-      title: Text(title),
+      title: Text(
+        title,
+        style: TextStyle(color: textColor),
+      ), // Teks judul RadioListTile menyesuaikan tema
       value: mode,
       groupValue: themeProvider.themeMode,
       onChanged: (ThemeMode? newMode) {
@@ -74,24 +116,44 @@ class ThemeSettingsPage extends StatelessWidget {
           themeProvider.setThemeMode(newMode);
         }
       },
+      activeColor: activeColor, // Warna dot Radio yang aktif
     );
   }
 
-  // Contoh fungsi untuk menampilkan dialog pemilihan warna
-  void _showColorPickerDialog(BuildContext context, ThemeProvider themeProvider) {
-    // Ini adalah placeholder. Anda perlu mengimplementasikan dialog pemilihan warna
-    // yang sebenarnya dan logika untuk menyimpan dan menerapkan warna aksen.
+  // Fungsi untuk menampilkan dialog pemilihan warna
+  void _showColorPickerDialog(
+    BuildContext context,
+    ThemeProvider themeProvider,
+  ) {
+    final theme = Theme.of(context); // Dapatkan tema untuk dialog
+    final dialogTitleColor = theme.textTheme.titleMedium?.color;
+    final dialogContentColor = theme.textTheme.bodyMedium?.color;
+    final dialogButtonColor = theme.textButtonTheme.style?.foregroundColor
+        ?.resolve({});
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
+        // Gunakan dialogContext
         return AlertDialog(
-          title: const Text('Pilih Warna Aksen'),
-          content: const Text('Fungsionalitas pemilihan warna aksen akan datang!'),
+          backgroundColor:
+              theme.cardColor, // Background AlertDialog menyesuaikan tema
+          title: Text(
+            'Pilih Warna Aksen',
+            style: TextStyle(color: dialogTitleColor),
+          ), // Judul dialog menyesuaikan tema
+          content: Text(
+            'Fungsionalitas pemilihan warna aksen akan datang!',
+            style: TextStyle(color: dialogContentColor),
+          ), // Konten dialog menyesuaikan tema
           actions: <Widget>[
             TextButton(
-              child: const Text('Tutup'),
+              child: Text(
+                'Tutup',
+                style: TextStyle(color: dialogButtonColor),
+              ), // Teks tombol menyesuaikan tema
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop(); // Gunakan dialogContext
               },
             ),
           ],

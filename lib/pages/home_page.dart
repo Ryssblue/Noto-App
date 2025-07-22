@@ -11,6 +11,7 @@ import 'note_detail_page.dart';
 import '../menu/favorites_page.dart';
 import '../menu/settings_page.dart';
 import '../menu/archived_notes_page.dart'; // Import halaman arsip
+import '../menu/feedback_page.dart'; // Import halaman feedback
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -368,16 +369,20 @@ class _HomePageState extends State<HomePage> {
                 _refreshNotes();
               },
             ),
-            ListTile(
-              leading: Icon(Icons.delete_outline, color: drawerItemColor),
-              title: Text('Sampah', style: TextStyle(color: drawerItemColor)),
+             ListTile(
+              leading: Icon(Icons.feedback_outlined, color: drawerItemColor),
+              title: Text('Feedback', style: TextStyle(color: drawerItemColor)),
               onTap: () {
-                // TODO: Navigasi ke Halaman Sampah
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FeedbackPage()),
+                );
               },
             ),
             Divider(
               color: drawerItemColor?.withOpacity(0.3),
-            ), // Theme-aware divider
+            ),
             ListTile(
               leading: Icon(Icons.settings_outlined, color: drawerItemColor),
               title: Text(

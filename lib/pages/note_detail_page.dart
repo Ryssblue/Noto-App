@@ -25,23 +25,6 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
   }
 
   // Fungsi untuk navigasi ke halaman edit
-  Future<void> _navigateToEditPage() async {
-    // Tunggu hasil dari EditNotePage
-    final updatedNote = await Navigator.push<NoteModel>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => EditNotePage(note: NoteModel.fromMap(_note.toMap())),
-      ),
-    );
-
-    // Jika ada data yang dikembalikan (catatan diperbarui),
-    // perbarui UI halaman ini
-    if (updatedNote != null) {
-      setState(() {
-        _note = updatedNote;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,11 +36,6 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
         title: Text(_note.title),
         actions: [
           // Tombol untuk mengedit catatan
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            tooltip: 'Ubah Catatan',
-            onPressed: _navigateToEditPage,
-          ),
         ],
       ),
       body: SingleChildScrollView(

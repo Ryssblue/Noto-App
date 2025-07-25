@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -72,10 +71,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Beri Kami Masukan'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Beri Kami Masukan'), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Form(
@@ -89,24 +85,34 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 style: TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 24),
-              const Text('1. Pilih Kategori Masukan Anda', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                '1. Pilih Kategori Masukan Anda',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 12),
               _buildCategorySelection(),
               const SizedBox(height: 24),
               if (_selectedCategory != null) ...[
-                const Text('2. Detail Masukan', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  '2. Detail Masukan',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
                 _buildDynamicFormFields(),
                 const SizedBox(height: 24),
               ],
-              const Text('3. Informasi Kontak (Opsional)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                '3. Informasi Kontak (Opsional)',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(
                   labelText: 'Email Anda (Opsional)',
                   border: OutlineInputBorder(),
-                  helperText: 'Kami mungkin akan menghubungi Anda jika memerlukan detail lebih lanjut.',
+                  helperText:
+                      'Kami mungkin akan menghubungi Anda jika memerlukan detail lebih lanjut.',
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -120,7 +126,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   label: const Text('Kirim Masukan'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               const SizedBox(height: 12),
@@ -184,22 +193,31 @@ class _FeedbackPageState extends State<FeedbackPage> {
               controller: _bugController,
               decoration: const InputDecoration(
                 labelText: 'Jelaskan Bug yang Anda Temukan',
-                hintText: 'Contoh: Saat saya mencoba membagikan catatan, aplikasi langsung tertutup.',
+                hintText:
+                    'Contoh: Saat saya mencoba membagikan catatan, aplikasi langsung tertutup.',
                 border: OutlineInputBorder(),
               ),
               maxLines: 5,
-              validator: (value) => value!.isEmpty ? 'Deskripsi bug tidak boleh kosong' : null,
+              validator: (value) =>
+                  value!.isEmpty ? 'Deskripsi bug tidak boleh kosong' : null,
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: _attachFile,
               icon: const Icon(Icons.add_a_photo_outlined),
-              label: Text(_attachment == null ? 'Lampirkan Screenshot' : 'Ganti Screenshot'),
+              label: Text(
+                _attachment == null
+                    ? 'Lampirkan Screenshot'
+                    : 'Ganti Screenshot',
+              ),
             ),
             if (_attachment != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
-                child: Text('File terlampir: ${_attachment!.name}', style: const TextStyle(color: Colors.green)),
+                child: Text(
+                  'File terlampir: ${_attachment!.name}',
+                  style: const TextStyle(color: Colors.green),
+                ),
               ),
           ],
         );
@@ -210,22 +228,26 @@ class _FeedbackPageState extends State<FeedbackPage> {
               controller: _featureIdeaController,
               decoration: const InputDecoration(
                 labelText: 'Jelaskan Ide Fitur Anda',
-                hintText: 'Contoh: Fitur untuk mengunci catatan dengan sidik jari.',
+                hintText:
+                    'Contoh: Fitur untuk mengunci catatan dengan sidik jari.',
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
-              validator: (value) => value!.isEmpty ? 'Ide fitur tidak boleh kosong' : null,
+              validator: (value) =>
+                  value!.isEmpty ? 'Ide fitur tidak boleh kosong' : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _featureReasonController,
               decoration: const InputDecoration(
                 labelText: 'Mengapa Fitur Ini Penting Bagi Anda?',
-                hintText: 'Contoh: Untuk membantu saya menyimpan informasi sensitif.',
+                hintText:
+                    'Contoh: Untuk membantu saya menyimpan informasi sensitif.',
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
-              validator: (value) => value!.isEmpty ? 'Alasan tidak boleh kosong' : null,
+              validator: (value) =>
+                  value!.isEmpty ? 'Alasan tidak boleh kosong' : null,
             ),
           ],
         );
@@ -239,7 +261,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
             border: OutlineInputBorder(),
           ),
           maxLines: 6,
-          validator: (value) => value!.isEmpty ? 'Masukan tidak boleh kosong' : null,
+          validator: (value) =>
+              value!.isEmpty ? 'Masukan tidak boleh kosong' : null,
         );
     }
   }
@@ -250,7 +273,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
       barrierDismissible: false,
       builder: (BuildContext dialogContext) => AlertDialog(
         title: const Text('Terima Kasih! 🎉'),
-        content: const Text('Masukan Anda telah berhasil kami terima. Terima kasih telah membantu kami menjadi lebih baik.'),
+        content: const Text(
+          'Masukan Anda telah berhasil kami terima. Terima kasih telah membantu kami menjadi lebih baik.',
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -307,7 +332,9 @@ class _CategoryButton extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         width: 160,
         decoration: BoxDecoration(
-          color: isSelected ? theme.primaryColor.withOpacity(0.1) : theme.cardColor,
+          color: isSelected
+              ? theme.primaryColor.withOpacity(0.1)
+              : theme.cardColor,
           border: Border.all(
             color: isSelected ? theme.primaryColor : Colors.grey.shade300,
             width: 1.5,

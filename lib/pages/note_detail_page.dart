@@ -23,8 +23,6 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
     _note = widget.note;
   }
 
-  // Fungsi untuk navigasi ke halaman edit
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

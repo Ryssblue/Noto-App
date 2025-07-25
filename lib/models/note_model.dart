@@ -1,6 +1,3 @@
-// models/note_model.dart
-import 'package:uuid/uuid.dart'; // Pastikan ini ada jika Anda menggunakan UUID
-
 class NoteModel {
   String id;
   String title;

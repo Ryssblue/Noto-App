@@ -1,7 +1,6 @@
 import 'dart:io'; // Import for File
 import 'package:flutter/material.dart';
 import '../models/note_model.dart';
-import 'edit_note_page.dart';
 import 'package:intl/intl.dart';
 
 class NoteDetailPage extends StatefulWidget {
